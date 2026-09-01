@@ -102,7 +102,7 @@ export const MAX_DIGITAL_INPUTS = 21;
 export const MAX_ANALOG_INPUTS = 3;
 export const MAX_EXPR = 16;
 
-export const DIGITAL_PINS = [0, 1, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22];
+export const DIGITAL_PINS = [0, 1, 2, 3, 4, 5, 9, 10, 11, 12, 16, 17, 20, 21];
 
 export const ANALOG_PINS = [26, 27, 28];
 

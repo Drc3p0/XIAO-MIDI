@@ -145,7 +145,7 @@ function defaultConfig() {
       defaultInputItem(0, 60),
     ],
     touch_pads: [
-      defaultInputItem(6, 48, { threshold_pct: 25 }),
+      defaultInputItem(5, 48, { threshold_pct: 25 }),
     ],
     pots: [
       { pin: 26, cc: 7 },
@@ -688,7 +688,7 @@ async function handleProjectImport(e) {
         ldr: { pin: clamp(project.ldr.pin, 0, 29), cc: clamp(project.ldr.cc, 0, 127) },
         accel: {
           enabled: !!project.accel.enabled,
-          chip: clamp(project.accel.chip ?? 0, 0, 2),
+          chip: clamp(project.accel.chip ?? 0, 0, 3),
           x_cc: clamp(project.accel.x_cc, 0, 127),
           y_cc: clamp(project.accel.y_cc, 0, 127),
           tap_note: clamp(project.accel.tap_note, 0, 127),

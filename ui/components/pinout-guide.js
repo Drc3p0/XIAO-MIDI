@@ -4,49 +4,31 @@ import { BaseElement } from "./helpers.js";
 // Each entry: [physicalPin, label, gpio]  (gpio is null for non-GPIO pins)
 
 const LEFT_PINS = [
-  [1,  "GP0",       0],
-  [2,  "GP1",       1],
-  [3,  "GND",       null],
-  [4,  "GP2",       2],
-  [5,  "GP3",       3],
-  [6,  "GP4",       4],
-  [7,  "GP5",       5],
-  [8,  "GND",       null],
-  [9,  "GP6",       6],
-  [10, "GP7",       7],
-  [11, "GP8",       8],
-  [12, "GP9",       9],
-  [13, "GND",       null],
-  [14, "GP10",      10],
-  [15, "GP11",      11],
-  [16, "GP12",      12],
-  [17, "GP13",      13],
-  [18, "GND",       null],
-  [19, "GP14",      14],
-  [20, "GP15",      15],
+  [1,  "5V",        null],
+  [2,  "GND",       null],
+  [3,  "3V3",       null],
+  [4,  "GP3 D10",   3],
+  [5,  "GP4 D9",    4],
+  [6,  "GP2 D8",    2],
+  [7,  "GP1 D7",    1],
+  [8,  "GP0 D6",    0],
+  [9,  "GP7 D5",    7],
+  [10, "GP6 D4",    6],
+  [11, "GP5 D3",    5],
+  [12, "GP28 D2",   28],
+  [13, "GP27 D1",   27],
+  [14, "GP26 D0",   26],
 ];
 
 const RIGHT_PINS = [
-  [40, "VBUS",      null],
-  [39, "VSYS",      null],
-  [38, "GND",       null],
-  [37, "3V3_EN",    null],
-  [36, "3V3",       null],
-  [35, "ADC_VREF",  null],
-  [34, "GP28/A2",   28],
-  [33, "AGND",      null],
-  [32, "GP27/A1",   27],
-  [31, "GP26/A0",   26],
-  [30, "RUN",       null],
-  [29, "GP22",      22],
-  [28, "GND",       null],
-  [27, "GP21",      21],
-  [26, "GP20",      20],
-  [25, "GP19",      19],
-  [24, "GP18",      18],
-  [23, "GND",       null],
-  [22, "GP17",      17],
-  [21, "GP16",      16],
+  [15, "GP21 D11", 21],
+  [16, "GP20 D12", 20],
+  [17, "GP17 D13", 17],
+  [18, "GP16 D14", 16],
+  [19, "GP11 D15", 11],
+  [20, "GP12 D16", 12],
+  [21, "GP10 D17", 10],
+  [22, "GP9 D18",  9],
 ];
 
 function pinClass(label) {
@@ -85,8 +67,8 @@ function buildAssignments(cfg) {
     map[cfg.ldr.pin] = { type: "ldr", label: "LDR", colors: ASSIGN_COLORS.ldr };
   }
   if (cfg.accel.enabled) {
-    map[2] = { type: "accel", label: "Accel SDA", colors: ASSIGN_COLORS.accel };
-    map[3] = { type: "accel", label: "Accel SCL", colors: ASSIGN_COLORS.accel };
+    map[6] = { type: "accel", label: "Accel SDA", colors: ASSIGN_COLORS.accel };
+    map[7] = { type: "accel", label: "Accel SCL", colors: ASSIGN_COLORS.accel };
   }
 
   return map;
@@ -119,7 +101,7 @@ function buildSVG(assignments) {
   svg += `<text x="${usbX + USB_W / 2}" y="${boardY + USB_H / 2 - 1}" text-anchor="middle" dominant-baseline="central" fill="#999" font-size="7" font-family="monospace">USB</text>`;
 
   // Raspberry Pi Pico label
-  svg += `<text x="${boardX + BOARD_W / 2}" y="${boardY + BOARD_H - 10}" text-anchor="middle" fill="#2d5a2d" font-size="10" font-family="monospace" font-weight="700">RASPBERRY PI PICO</text>`;
+  svg += `<text x="${boardX + BOARD_W / 2}" y="${boardY + BOARD_H - 10}" text-anchor="middle" fill="#2d5a2d" font-size="10" font-family="monospace" font-weight="700">XIAO RP2350</text>`;
 
   function drawPin(physPin, label, gpio, cx, cy, side) {
     const assign = gpio != null ? assignments[gpio] : null;

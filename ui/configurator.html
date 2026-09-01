@@ -82,8 +82,8 @@
               <span class="slider"></span>
             </label>
             <label>Enabled</label>
-            <span class="pin-label">Accel SCL GP3</span>
-            <span class="pin-label">Accel SDA GP2</span>
+            <span class="pin-label">Accel SCL GP7</span>
+            <span class="pin-label">Accel SDA GP6</span>
           </div>
           <div id="accelFields">
             <div class="field">
@@ -92,6 +92,7 @@
                 <option value="0">Auto (detect)</option>
                 <option value="1">LIS3DH</option>
                 <option value="2">MPU6050</option>
+                <option value="3">ADXL343</option>
               </select>
             </div>
             <div class="field"><label>X Axis CC</label><input type="number" id="accelXCc" min="0" max="127" value="1"></div>
@@ -170,7 +171,7 @@
       </tr>
       <tr class="wiring-row-accel">
         <td><span class="wiring-dot" style="background:#0af"></span>Accel</td>
-        <td>LIS3DH or MPU6050 module</td>
+        <td>LIS3DH, MPU6050, or ADXL343 module</td>
         <td>GP2 (SDA), GP3 (SCL)</td>
         <td>I2C: SDA/SCL to <strong>GP2</strong>/<strong>GP3</strong>, VCC to <strong>3V3</strong>, GND to <strong>GND</strong></td>
       </tr>
