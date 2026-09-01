@@ -1,6 +1,6 @@
-# pico-midi
+# XIAO-MIDI
 
-Embedded MIDI controller firmware for Raspberry Pi Pico 2 (RP2350) written in Rust using the Embassy async framework, with a vanilla HTML/JS web configurator UI.
+Embedded MIDI controller firmware for Seeed Studio XIAO RP2350 (RP2350) written in Rust using the Embassy async framework, with a vanilla HTML/JS web configurator UI.
 
 ## Project Structure
 

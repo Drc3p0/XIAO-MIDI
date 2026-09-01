@@ -1,5 +1,5 @@
 ---
-description: Reviews pico-midi firmware and UI changes for correctness, safety, and embedded best practices
+description: Reviews XIAO-MIDI firmware and UI changes for correctness, safety, and embedded best practices
 mode: subagent
 permission:
   edit: deny

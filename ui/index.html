@@ -3,19 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>pico-midi</title>
+<title>XIAO-MIDI</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="container">
   <header>
-    <h1>pico-midi</h1>
+    <h1>XIAO-MIDI</h1>
   </header>
 
   <p class="landing-intro">
-    Firmware for building custom MIDI controllers with Raspberry Pi Pico.
-    Supports buttons, touch pads, potentiometers, light sensors, and accelerometers.
-    Configure everything from your browser &mdash; no code required.
+    Firmware for building custom MIDI controllers with the Seeed Studio XIAO RP2350.
+    Supports buttons, touch pads, potentiometers, light sensors, and accelerometers
+    (LIS3DH, MPU6050, ADXL343). Configure everything from your browser &mdash; no code required.
   </p>
 
   <div class="landing-section">
@@ -30,7 +30,7 @@
     <ol class="landing-steps">
       <li>
         <strong>Flash it</strong><br>
-        Hold the <code>BOOTSEL</code> button on your Pico while plugging it into USB.
+        Hold the <code>BOOTSEL</code> button on your XIAO RP2350 while plugging it into USB.
         It will appear as a removable drive. Drag the <code>.uf2</code> file onto it.
         The board will reboot automatically.
       </li>
@@ -44,17 +44,17 @@
 
   <div class="landing-cta">
     <a class="btn btn-primary" href="configurator.html">Open Configurator</a>
-    <a class="btn" href="https://github.com/jveski/pico-midi">GitHub</a>
+    <a class="btn" href="https://github.com/Drc3p0/XIAO-MIDI">GitHub</a>
   </div>
 </div>
 
 <script>
-const REPO = "jveski/pico-midi";
+const REPO = "Drc3p0/XIAO-MIDI";
 const FRIENDLY_NAMES = {
-  "midictrl-rp2350.uf2": "RP2350 Firmware",
+  "midictrl-rp2350.uf2": "XIAO RP2350 Firmware",
 };
 const FRIENDLY_DESCRIPTIONS = {
-  "midictrl-rp2350.uf2": "Raspberry Pi Pico 2",
+  "midictrl-rp2350.uf2": "Seeed Studio XIAO RP2350",
 };
 
 async function loadDownloads() {

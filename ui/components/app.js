@@ -393,12 +393,12 @@ function saveExprSources() {
   if (!config) return;
   const summary = item => ({ pin: item.pin, note: item.note_expr_src || "", vel: item.velocity_expr_src || "" });
   const data = { buttons: config.buttons.map(summary), touch: config.touch_pads.map(summary) };
-  try { localStorage.setItem("picomidi_expr", JSON.stringify(data)); } catch {}
+  try { localStorage.setItem("xiaomidi_expr", JSON.stringify(data)); } catch {}
 }
 
 function loadExprSources() {
   try {
-    const data = JSON.parse(localStorage.getItem("picomidi_expr") || "{}");
+    const data = JSON.parse(localStorage.getItem("xiaomidi_expr") || "{}");
     // Match stored sources to config items by pin number (more robust than index)
     const applyData = (items, stored) => {
       if (!items || !stored) return;
@@ -617,7 +617,7 @@ async function resetConfig() {
     try {
       const resp = await sendRequest(REQ_RESET);
       if (resp.type === "ok") {
-        try { localStorage.removeItem("picomidi_expr"); } catch {}
+        try { localStorage.removeItem("xiaomidi_expr"); } catch {}
         await refreshConfig();
         markDirty();
         toast("Defaults restored", "info");
@@ -635,7 +635,7 @@ function exportProject() {
 
   // Build a clean JSON-serializable project object
   const project = {
-    _format: "pico-midi-project",
+    _format: "xiao-midi-project",
     _version: 3,
     midi_channel: cfg.midi_channel,
     buttons: cfg.buttons.map(b => normalizeInputItem(b)),
@@ -651,7 +651,7 @@ function exportProject() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "pico-midi-project.json";
+  a.download = "xiao-midi-project.json";
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -720,7 +720,7 @@ async function handleProjectImport(e) {
 
 function validateProject(p) {
   if (!p || typeof p !== "object") return false;
-  if (p._format !== "pico-midi-project") return false;
+  if (p._format !== "xiao-midi-project") return false;
   if (typeof p.midi_channel !== "number") return false;
 
   // Variable-length arrays: just check they exist and are within bounds

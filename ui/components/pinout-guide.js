@@ -100,7 +100,7 @@ function buildSVG(assignments) {
   svg += `<rect x="${usbX}" y="${boardY - 4}" width="${USB_W}" height="${USB_H}" rx="3" fill="#444" stroke="#666" stroke-width="1.5"/>`;
   svg += `<text x="${usbX + USB_W / 2}" y="${boardY + USB_H / 2 - 1}" text-anchor="middle" dominant-baseline="central" fill="#999" font-size="7" font-family="monospace">USB</text>`;
 
-  // Raspberry Pi Pico label
+  // XIAO RP2350 label
   svg += `<text x="${boardX + BOARD_W / 2}" y="${boardY + BOARD_H - 10}" text-anchor="middle" fill="#2d5a2d" font-size="10" font-family="monospace" font-weight="700">XIAO RP2350</text>`;
 
   function drawPin(physPin, label, gpio, cx, cy, side) {

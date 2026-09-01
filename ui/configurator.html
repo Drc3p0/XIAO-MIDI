@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>pico-midi configurator</title>
+<title>XIAO-MIDI configurator</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,7 +11,7 @@
 <!-- Sticky top toolbar -->
 <toolbar-bar id="toolbar" class="toolbar">
   <div class="toolbar-left">
-    <h1><a href="./">pico-midi</a> <span>configurator</span></h1>
+    <h1><a href="./">XIAO-MIDI</a> <span>configurator</span></h1>
   </div>
   <div class="toolbar-center">
     <button class="btn toolbar-ref-btn" data-modal="pinout" id="btnPinout" title="Pinout &amp; wiring reference">Pinout</button>
@@ -148,13 +148,13 @@
       <tr class="wiring-row-button">
         <td><span class="wiring-dot" style="background:#0f0"></span>Button</td>
         <td>Momentary switch</td>
-        <td>GP0–1, GP4–22</td>
+        <td>GP0–1, GP2–5, GP9–12, GP16–17, GP20–21</td>
         <td>Switch between <strong>GPIO</strong> and <strong>GND</strong> (internal pull-up, no resistor needed)</td>
       </tr>
       <tr class="wiring-row-touch">
         <td><span class="wiring-dot" style="background:#ff0"></span>Touch</td>
         <td>Conductive pad (copper tape / foil / bare PCB)</td>
-        <td>GP0–1, GP4–22</td>
+        <td>GP0–1, GP2–5, GP9–12, GP16–17, GP20–21</td>
         <td>Pad connected to <strong>GPIO</strong> only (capacitive sensing, no GND)</td>
       </tr>
       <tr class="wiring-row-pot">
@@ -172,17 +172,17 @@
       <tr class="wiring-row-accel">
         <td><span class="wiring-dot" style="background:#0af"></span>Accel</td>
         <td>LIS3DH, MPU6050, or ADXL343 module</td>
-        <td>GP2 (SDA), GP3 (SCL)</td>
-        <td>I2C: SDA/SCL to <strong>GP2</strong>/<strong>GP3</strong>, VCC to <strong>3V3</strong>, GND to <strong>GND</strong></td>
+        <td>GP6 (SDA), GP7 (SCL)</td>
+        <td>I2C: SDA/SCL to <strong>GP6</strong>/<strong>GP7</strong>, VCC to <strong>3V3</strong>, GND to <strong>GND</strong></td>
       </tr>
     </table>
 
     <h3>Pin Summary</h3>
     <table class="wiring-table">
       <tr><th>Pool</th><th>Available Pins</th><th>Max</th></tr>
-      <tr><td>Digital (buttons / touch)</td><td>GP0–GP1, GP4–GP22</td><td>21</td></tr>
+      <tr><td>Digital (buttons / touch)</td><td>GP0–1, GP2–5, GP9–12, GP16–17, GP20–21</td><td>14</td></tr>
       <tr><td>Analog (pots / LDR)</td><td>GP26, GP27, GP28</td><td>3</td></tr>
-      <tr><td>I2C (accelerometer)</td><td>GP2 (SDA), GP3 (SCL)</td><td>fixed</td></tr>
+      <tr><td>I2C (accelerometer)</td><td>GP6 (SDA), GP7 (SCL)</td><td>fixed</td></tr>
     </table>
   </div>
 </ref-modal>
