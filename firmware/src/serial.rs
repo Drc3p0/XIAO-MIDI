@@ -167,9 +167,8 @@ async fn send(serial: &mut Serial<'static>, data: &[u8]) -> bool {
         }
     }
     // Send ZLP if the payload was a non-zero exact multiple of 64 bytes.
-    if !data.is_empty() && data.len().is_multiple_of(64) && serial.write_packet(&[]).await.is_err()
-    {
-        return false;
+    if !data.is_empty() && data.len().is_multiple_of(64) {
+        return serial.write_packet(&[]).await.is_ok();
     }
     true
 }

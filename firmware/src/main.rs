@@ -112,7 +112,8 @@ async fn main(_spawner: Spawner) {
 
     let cfg = RefCell::new(cfg);
 
-    let i2c1 = i2c::I2c::new_async(p.I2C1, p.PIN_3, p.PIN_2, Irqs, i2c::Config::default());
+    // XIAO RP2350 I2C1: SCL = GP7 (D5), SDA = GP6 (D4).
+    let i2c1 = i2c::I2c::new_async(p.I2C1, p.PIN_7, p.PIN_6, Irqs, i2c::Config::default());
     let midi_fut = polling::run(
         &mut midi_class,
         &mut led,

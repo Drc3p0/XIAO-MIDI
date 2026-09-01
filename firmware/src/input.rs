@@ -450,11 +450,27 @@ const MPU6050_INT_ENABLE: u8 = 0x38;
 const MPU6050_INT_STATUS: u8 = 0x3A;
 const MPU6050_ACCEL_XOUT_H: u8 = 0x3B;
 
+// ---------------------------------------------------------------------------
+// ADXL343 registers and address
+// ---------------------------------------------------------------------------
+const ADXL343_ADDR: u8 = 0x53;
+const ADXL343_DEVID: u8 = 0x00; // WHO_AM_I, reads 0xE5
+const ADXL343_THRESH_TAP: u8 = 0x1D;
+const ADXL343_DUR: u8 = 0x21;
+const ADXL343_TAP_AXES: u8 = 0x2A;
+const ADXL343_BW_RATE: u8 = 0x2C;
+const ADXL343_POWER_CTL: u8 = 0x2D;
+const ADXL343_INT_ENABLE: u8 = 0x2E;
+const ADXL343_INT_SOURCE: u8 = 0x30;
+const ADXL343_DATA_FORMAT: u8 = 0x31;
+const ADXL343_DATAX0: u8 = 0x32;
+
 /// Which chip was actually detected at runtime.
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum DetectedChip {
     Lis3dh,
     Mpu6050,
+    Adxl343,
 }
 
 pub struct AccelReading {
@@ -500,6 +516,7 @@ impl<'d> Accelerometer<'d> {
             match detected {
                 Some(DetectedChip::Lis3dh) => crate::log_info!("LIS3DH initialised"),
                 Some(DetectedChip::Mpu6050) => crate::log_info!("MPU6050 initialised"),
+                Some(DetectedChip::Adxl343) => crate::log_info!("ADXL343 initialised"),
                 None => {}
             }
         }
@@ -674,12 +691,21 @@ impl<'d> Accelerometer<'d> {
                     None
                 }
             }
+            AccelChip::Adxl343 => {
+                if Self::init_adxl343(i2c).await.is_ok() {
+                    Some(DetectedChip::Adxl343)
+                } else {
+                    None
+                }
+            }
             AccelChip::Auto => {
-                // Try LIS3DH first (existing default), then MPU6050.
+                // Try LIS3DH first (existing default), then MPU6050, then ADXL343.
                 if Self::init_lis3dh(i2c).await.is_ok() {
                     Some(DetectedChip::Lis3dh)
                 } else if Self::init_mpu6050(i2c).await.is_ok() {
                     Some(DetectedChip::Mpu6050)
+                } else if Self::init_adxl343(i2c).await.is_ok() {
+                    Some(DetectedChip::Adxl343)
                 } else {
                     None
                 }
@@ -751,6 +777,38 @@ impl<'d> Accelerometer<'d> {
         Ok(())
     }
 
+    async fn init_adxl343(i2c: &mut I2c<'_, I2C1, i2c::Async>) -> Result<(), i2c::Error> {
+        // Verify DEVID (should return 0xE5 for ADXL343/345).
+        let mut devid = [0u8; 1];
+        i2c.write_read_async(ADXL343_ADDR, [ADXL343_DEVID], &mut devid)
+            .await?;
+        if devid[0] != 0xE5 {
+            return Err(i2c::Error::Abort(i2c::AbortReason::NoAcknowledge));
+        }
+
+        // 100 Hz output data rate.
+        i2c.write_async(ADXL343_ADDR, [ADXL343_BW_RATE, 0x0A])
+            .await?;
+        // Full resolution (constant ~3.9 mg/LSB) with +/-8g range.
+        i2c.write_async(ADXL343_ADDR, [ADXL343_DATA_FORMAT, 0x0A])
+            .await?;
+        // Single-tap detection on the Z axis.
+        i2c.write_async(ADXL343_ADDR, [ADXL343_TAP_AXES, 0x04])
+            .await?;
+        // Tap threshold ~2g (62.5 mg/LSB * 32).
+        i2c.write_async(ADXL343_ADDR, [ADXL343_THRESH_TAP, 0x20])
+            .await?;
+        // Tap duration ~10 ms (625 us/LSB * 16).
+        i2c.write_async(ADXL343_ADDR, [ADXL343_DUR, 0x10]).await?;
+        // Enable single-tap interrupt.
+        i2c.write_async(ADXL343_ADDR, [ADXL343_INT_ENABLE, 0x40])
+            .await?;
+        // Start measuring (MEASURE bit).
+        i2c.write_async(ADXL343_ADDR, [ADXL343_POWER_CTL, 0x08])
+            .await?;
+        Ok(())
+    }
+
     // -----------------------------------------------------------------------
     // Data reading
     // -----------------------------------------------------------------------
@@ -783,6 +841,18 @@ impl<'d> Accelerometer<'d> {
                 let scale = 8.0 * 9.81 / 32768.0;
                 Some((x_raw * scale, y_raw * scale))
             }
+            DetectedChip::Adxl343 => {
+                self.i2c
+                    .write_read_async(ADXL343_ADDR, [ADXL343_DATAX0], &mut buf)
+                    .await
+                    .ok()?;
+                // Little-endian 16-bit two's complement, 13-bit left-justified
+                // (FULL_RES). Scale: 9.81/256 m/s^2 per 13-bit count.
+                let x_raw = f32::from(i16::from_le_bytes([buf[0], buf[1]]) >> 3);
+                let y_raw = f32::from(i16::from_le_bytes([buf[2], buf[3]]) >> 3);
+                let scale = 9.81 / 256.0;
+                Some((x_raw * scale, y_raw * scale))
+            }
         }
     }
 
@@ -812,6 +882,20 @@ impl<'d> Accelerometer<'d> {
                 {
                     // Bit 6: Motion Detection interrupt
                     status[0] & 0x40 != 0
+                } else {
+                    false
+                }
+            }
+            DetectedChip::Adxl343 => {
+                let mut src = [0u8; 1];
+                if self
+                    .i2c
+                    .write_read_async(ADXL343_ADDR, [ADXL343_INT_SOURCE], &mut src)
+                    .await
+                    .is_ok()
+                {
+                    // Bit 6: single-tap interrupt (reading INT_SOURCE clears it).
+                    src[0] & 0x40 != 0
                 } else {
                     false
                 }

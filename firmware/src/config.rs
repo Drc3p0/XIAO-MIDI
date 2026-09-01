@@ -18,12 +18,11 @@ pub const CONFIG_OFFSET: u32 = (FLASH_SIZE - SECTOR_SIZE) as u32;
 const HEADER_SIZE: usize = 5;
 
 #[cfg(target_os = "none")]
-pub const FLASH_SIZE: usize = 4 * 1024 * 1024;
+pub const FLASH_SIZE: usize = 2 * 1024 * 1024;
 
-/// All GPIOs 0-22 except GP2 (I2C SDA), GP3 (I2C SCL), GP25 (LED).
-pub const DIGITAL_PINS: [u8; MAX_DIGITAL_INPUTS] = [
-    0, 1, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
-];
+/// XIAO RP2350 GPIOs exposed for buttons/touch pads, excluding GP6/GP7
+/// (I2C1 SDA/SCL), GP22 (RGB), GP23 (RGB power), GP25 (LED).
+pub const DIGITAL_PINS: [u8; 14] = [0, 1, 2, 3, 4, 5, 9, 10, 11, 12, 16, 17, 20, 21];
 
 pub const ANALOG_PINS: [u8; MAX_ANALOG_INPUTS] = [26, 27, 28];
 
@@ -143,6 +142,7 @@ pub enum AccelChip {
     Auto = 0,
     Lis3dh = 1,
     Mpu6050 = 2,
+    Adxl343 = 3,
 }
 
 #[derive(Clone, Copy, Serialize, Deserialize)]
@@ -326,7 +326,7 @@ impl Default for Config {
             num_touch_pads: 1,
             touch_pads: {
                 let mut arr = [empty_touch(); MAX_DIGITAL_INPUTS];
-                arr[0] = default_touch(6, 48, 100, 25);
+                arr[0] = default_touch(5, 48, 100, 25);
                 arr
             },
             num_pots: 1,
@@ -416,8 +416,8 @@ mod tests {
 
         // Same pin used by button and touch pad
         let mut cfg = Config::default();
-        cfg.buttons[0].pin = 6;
-        cfg.touch_pads[0].pin = 6;
+        cfg.buttons[0].pin = 5;
+        cfg.touch_pads[0].pin = 5;
         assert!(!cfg.validate());
     }
 
