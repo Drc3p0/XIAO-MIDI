@@ -102,9 +102,15 @@ export const MAX_DIGITAL_INPUTS = 21;
 export const MAX_ANALOG_INPUTS = 3;
 export const MAX_EXPR = 16;
 
-export const DIGITAL_PINS = [0, 1, 2, 3, 4, 5, 9, 10, 11, 12, 16, 17, 20, 21];
+const BOARD = globalThis.XIAO_BOARD || "rp2350";
 
-export const ANALOG_PINS = [26, 27, 28];
+export const DIGITAL_PINS = BOARD === "rp2040"
+  ? [0, 1, 2, 3, 4]
+  : [0, 1, 2, 3, 4, 5, 9, 10, 11, 12, 16, 17, 20, 21];
+
+export const ANALOG_PINS = BOARD === "rp2040"
+  ? [26, 27, 28, 29]
+  : [26, 27, 28];
 
 function writeExpr(w, expr) {
   const len = expr ? expr.length : 0;

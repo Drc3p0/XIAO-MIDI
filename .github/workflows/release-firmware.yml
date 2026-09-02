@@ -20,7 +20,7 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@nightly
         with:
-          targets: thumbv8m.main-none-eabihf
+          targets: thumbv8m.main-none-eabihf, thumbv6m-none-eabi
 
       - uses: Swatinem/rust-cache@v2
         with:
@@ -37,11 +37,17 @@ jobs:
           cargo build --release --features rp2350 --target thumbv8m.main-none-eabihf
           elf2uf2-rs convert --family rp2350-arm-s target/thumbv8m.main-none-eabihf/release/midictrl midictrl-rp2350.uf2
 
+      - name: Build rp2040 firmware
+        run: |
+          cargo build --release --features rp2040 --target thumbv6m-none-eabi
+          elf2uf2-rs convert --family rp2040 target/thumbv6m-none-eabi/release/midictrl midictrl-rp2040.uf2
+
       - name: Upload release assets
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release upload "${{ github.event.release.tag_name }}" \
             midictrl-rp2350.uf2 \
+            midictrl-rp2040.uf2 \
             --repo "${{ github.repository }}" \
             --clobber

@@ -22,7 +22,7 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@nightly
         with:
-          targets: thumbv8m.main-none-eabihf
+          targets: thumbv8m.main-none-eabihf, thumbv6m-none-eabi
           components: clippy, rustfmt
 
       - uses: Swatinem/rust-cache@v2
@@ -34,6 +34,12 @@ jobs:
 
       - name: Clippy (rp2350)
         run: cargo clippy --features rp2350 --target thumbv8m.main-none-eabihf -- -D warnings
+
+      - name: Check (rp2040)
+        run: cargo check --features rp2040 --target thumbv6m-none-eabi
+
+      - name: Clippy (rp2040)
+        run: cargo clippy --features rp2040 --target thumbv6m-none-eabi -- -D warnings
 
       - name: Test (x86)
         run: cargo test --no-default-features

@@ -3,33 +3,54 @@ import { BaseElement } from "./helpers.js";
 // Physical pin 1 is top-left (USB up), counting down left side, then up right side.
 // Each entry: [physicalPin, label, gpio]  (gpio is null for non-GPIO pins)
 
-const LEFT_PINS = [
-  [1,  "5V",        null],
-  [2,  "GND",       null],
-  [3,  "3V3",       null],
-  [4,  "GP3 D10",   3],
-  [5,  "GP4 D9",    4],
-  [6,  "GP2 D8",    2],
-  [7,  "GP1 D7",    1],
-  [8,  "GP0 D6",    0],
-  [9,  "GP7 D5",    7],
-  [10, "GP6 D4",    6],
-  [11, "GP5 D3",    5],
-  [12, "GP28 D2",   28],
-  [13, "GP27 D1",   27],
-  [14, "GP26 D0",   26],
-];
+const BOARD = globalThis.XIAO_BOARD || "rp2350";
 
-const RIGHT_PINS = [
-  [15, "GP21 D11", 21],
-  [16, "GP20 D12", 20],
-  [17, "GP17 D13", 17],
-  [18, "GP16 D14", 16],
-  [19, "GP11 D15", 11],
-  [20, "GP12 D16", 12],
-  [21, "GP10 D17", 10],
-  [22, "GP9 D18",  9],
-];
+const LEFT_PINS = BOARD === "rp2040"
+  ? [
+      [1,  "5V",        null],
+      [2,  "GND",       null],
+      [3,  "3V3",       null],
+      [4,  "GP3 D10",   3],
+      [5,  "GP4 D9",    4],
+      [6,  "GP2 D8",    2],
+      [7,  "GP1 D7",    1],
+      [8,  "GP0 D6",    0],
+      [9,  "GP7 D5",    7],
+      [10, "GP6 D4",    6],
+      [11, "GP29 D3",   29],
+      [12, "GP28 D2",   28],
+      [13, "GP27 D1",   27],
+      [14, "GP26 D0",   26],
+    ]
+  : [
+      [1,  "5V",        null],
+      [2,  "GND",       null],
+      [3,  "3V3",       null],
+      [4,  "GP3 D10",   3],
+      [5,  "GP4 D9",    4],
+      [6,  "GP2 D8",    2],
+      [7,  "GP1 D7",    1],
+      [8,  "GP0 D6",    0],
+      [9,  "GP7 D5",    7],
+      [10, "GP6 D4",    6],
+      [11, "GP5 D3",    5],
+      [12, "GP28 D2",   28],
+      [13, "GP27 D1",   27],
+      [14, "GP26 D0",   26],
+    ];
+
+const RIGHT_PINS = BOARD === "rp2040"
+  ? []
+  : [
+      [15, "GP21 D11", 21],
+      [16, "GP20 D12", 20],
+      [17, "GP17 D13", 17],
+      [18, "GP16 D14", 16],
+      [19, "GP11 D15", 11],
+      [20, "GP12 D16", 12],
+      [21, "GP10 D17", 10],
+      [22, "GP9 D18",  9],
+    ];
 
 function pinClass(label) {
   if (label === "GND" || label === "AGND") return "gnd";
@@ -100,8 +121,8 @@ function buildSVG(assignments) {
   svg += `<rect x="${usbX}" y="${boardY - 4}" width="${USB_W}" height="${USB_H}" rx="3" fill="#444" stroke="#666" stroke-width="1.5"/>`;
   svg += `<text x="${usbX + USB_W / 2}" y="${boardY + USB_H / 2 - 1}" text-anchor="middle" dominant-baseline="central" fill="#999" font-size="7" font-family="monospace">USB</text>`;
 
-  // XIAO RP2350 label
-  svg += `<text x="${boardX + BOARD_W / 2}" y="${boardY + BOARD_H - 10}" text-anchor="middle" fill="#2d5a2d" font-size="10" font-family="monospace" font-weight="700">XIAO RP2350</text>`;
+  // Board label
+  svg += `<text x="${boardX + BOARD_W / 2}" y="${boardY + BOARD_H - 10}" text-anchor="middle" fill="#2d5a2d" font-size="10" font-family="monospace" font-weight="700">${BOARD === "rp2040" ? "XIAO RP2040" : "XIAO RP2350"}</text>`;
 
   function drawPin(physPin, label, gpio, cx, cy, side) {
     const assign = gpio != null ? assignments[gpio] : null;

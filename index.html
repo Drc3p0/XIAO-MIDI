@@ -13,7 +13,7 @@
   </header>
 
   <p class="landing-intro">
-    Firmware for building custom MIDI controllers with the Seeed Studio XIAO RP2350.
+    Firmware for building custom MIDI controllers with the Seeed Studio XIAO RP2350 and XIAO RP2040.
     Supports buttons, touch pads, potentiometers, light sensors, and accelerometers
     (LIS3DH, MPU6050, ADXL343). Configure everything from your browser &mdash; no code required.
   </p>
@@ -36,14 +36,16 @@
       </li>
       <li>
         <strong>Configure</strong><br>
-        Open the <a href="configurator.html">configurator</a> in Chrome or Edge and
+        Open the <a href="configurator-rp2350.html">RP2350 configurator</a> or the
+        <a href="configurator-rp2040.html">RP2040 configurator</a> in Chrome or Edge and
         connect to your device over USB to set up your MIDI mappings.
       </li>
     </ol>
   </div>
 
   <div class="landing-cta">
-    <a class="btn btn-primary" href="configurator.html">Open Configurator</a>
+    <a class="btn btn-primary" href="configurator-rp2350.html">Configure XIAO RP2350</a>
+    <a class="btn btn-primary" href="configurator-rp2040.html">Configure XIAO RP2040</a>
     <a class="btn" href="https://github.com/Drc3p0/XIAO-MIDI">GitHub</a>
   </div>
 </div>
@@ -52,9 +54,11 @@
 const REPO = "Drc3p0/XIAO-MIDI";
 const FRIENDLY_NAMES = {
   "midictrl-rp2350.uf2": "XIAO RP2350 Firmware",
+  "midictrl-rp2040.uf2": "XIAO RP2040 Firmware",
 };
 const FRIENDLY_DESCRIPTIONS = {
   "midictrl-rp2350.uf2": "Seeed Studio XIAO RP2350",
+  "midictrl-rp2040.uf2": "Seeed Studio XIAO RP2040",
 };
 
 async function loadDownloads() {

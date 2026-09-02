@@ -1,3 +1,4 @@
+#[cfg(feature = "rp2350")]
 use cortex_m::peripheral::DWT;
 use embassy_rp::adc::{self, Adc, Channel};
 use embassy_rp::gpio::{Drive, Flex, Input, Pull};
@@ -8,6 +9,36 @@ use embassy_time::Instant;
 use crate::config::{AccelChip, MAX_DIGITAL_INPUTS};
 
 const DEBOUNCE_MS: u64 = 10;
+
+/// Read the raw cycle timer for touch timing.
+///
+/// RP2350 (Cortex-M33) uses the DWT cycle counter. RP2040 (Cortex-M0+)
+/// has no DWT cycle counter, so we use SysTick — a 24-bit *down*-counter
+/// at the core clock (125 MHz on RP2040), initialised in `main()`.
+#[cfg(feature = "rp2350")]
+fn read_timer() -> u32 {
+    DWT::cycle_count()
+}
+
+#[cfg(feature = "rp2040")]
+fn read_timer() -> u32 {
+    // SYST is a zero-cost singleton over a fixed register block; we only
+    // read the current value here (no mutable state held across contexts).
+    cortex_m::peripheral::SYST::get_current()
+}
+
+/// Cycles elapsed since `start` (handles the SysTick down-counter wrap).
+#[cfg(feature = "rp2350")]
+fn cycles_since(start: u32) -> u32 {
+    DWT::cycle_count().wrapping_sub(start)
+}
+
+#[cfg(feature = "rp2040")]
+fn cycles_since(start: u32) -> u32 {
+    let now = cortex_m::peripheral::SYST::get_current();
+    // SysTick counts down: elapsed = start - now, mod 2^24.
+    start.wrapping_sub(now) & 0x00FF_FFFF
+}
 
 /// Minimum touch threshold in CPU cycles.  At 150 MHz this is ~2 µs, which
 /// prevents false triggers on very-low-capacitance pads where the
@@ -369,12 +400,12 @@ fn measure_touch_sync(pin: &mut Flex<'static>) -> u32 {
 
     pin.set_pull(Pull::Up);
 
-    let start = DWT::cycle_count();
+    let start = read_timer();
     pin.set_as_input();
 
     let mut elapsed;
     loop {
-        elapsed = DWT::cycle_count().wrapping_sub(start);
+        elapsed = cycles_since(start);
 
         let done = pin.is_high();
 
@@ -401,12 +432,12 @@ async fn measure_touch_async(pin: &mut Flex<'static>) -> u32 {
 
     pin.set_pull(Pull::Up);
 
-    let start = DWT::cycle_count();
+    let start = read_timer();
     pin.set_as_input();
 
     let mut elapsed;
     loop {
-        elapsed = DWT::cycle_count().wrapping_sub(start);
+        elapsed = cycles_since(start);
 
         let done = pin.is_high();
 
@@ -940,6 +971,11 @@ pub unsafe fn adc_channel_from_gpio(gpio: u8) -> Option<Channel<'static>> {
         }
         28 => {
             let pin = embassy_rp::peripherals::PIN_28::steal();
+            Some(Channel::new_pin(pin, Pull::None))
+        }
+        #[cfg(feature = "rp2040")]
+        29 => {
+            let pin = embassy_rp::peripherals::PIN_29::steal();
             Some(Channel::new_pin(pin, Pull::None))
         }
         _ => None,

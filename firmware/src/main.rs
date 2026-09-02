@@ -3,6 +3,9 @@
 // Embassy uses a single-threaded executor; futures do not need to be Send.
 #![allow(clippy::future_not_send)]
 
+#[cfg(all(target_os = "none", not(feature = "rp2350"), not(feature = "rp2040")))]
+compile_error!("Select a board feature: --features rp2350 or --features rp2040");
+
 mod config;
 mod expr;
 #[cfg(target_os = "none")]
@@ -64,11 +67,26 @@ async fn main(_spawner: Spawner) {
     let p = embassy_rp::init(embassy_rp::config::Config::default());
 
     // Enable the DWT cycle counter for sub-microsecond capacitive touch
-    // measurements.  embassy-rp does not take cortex-m core peripherals,
-    // so `take()` is available here.
-    let mut core = cortex_m::Peripherals::take().unwrap();
-    core.DCB.enable_trace();
-    core.DWT.enable_cycle_counter();
+    // measurements on RP2350.  embassy-rp does not take cortex-m core
+    // peripherals, so `take()` is available here.
+    // (RP2040 is Cortex-M0+ and has no DWT cycle counter; touch timing
+    // there uses the RP2040 timer instead — see input.rs.)
+    #[cfg(feature = "rp2350")]
+    {
+        let mut core = cortex_m::Peripherals::take().unwrap();
+        core.DCB.enable_trace();
+        core.DWT.enable_cycle_counter();
+    }
+
+    #[cfg(feature = "rp2040")]
+    {
+        // SysTick as a free-running 24-bit down-counter for touch timing.
+        let mut syst = cortex_m::Peripherals::take().unwrap().SYST;
+        syst.set_clock_source(cortex_m::peripheral::syst::SystClkSource::Core);
+        syst.set_reload(0x00FF_FFFF);
+        syst.clear_current();
+        syst.enable_counter();
+    }
 
     let mut flash =
         flash::Flash::<_, flash::Blocking, { config::FLASH_SIZE }>::new_blocking(p.FLASH);
@@ -105,14 +123,17 @@ async fn main(_spawner: Spawner) {
     let mut serial_class = CdcAcmClass::new(&mut builder, CDC_STATE.init(State::new()), 64);
     let mut midi_class = MidiClass::new(&mut builder, 1, 1, 64);
     let mut usb = builder.build();
+    #[cfg(feature = "rp2350")]
     let mut led = Output::new(p.PIN_25, Level::Low);
+    #[cfg(feature = "rp2040")]
+    let mut led = Output::new(p.PIN_17, Level::Low);
     let mut adc_inst = adc::Adc::new(p.ADC, Irqs, adc::Config::default());
     static INPUT_STATE: InputState = InputState::new();
     let usb_fut = usb.run();
 
     let cfg = RefCell::new(cfg);
 
-    // XIAO RP2350 I2C1: SCL = GP7 (D5), SDA = GP6 (D4).
+    // XIAO I2C1: SCL = GP7 (D5), SDA = GP6 (D4) — same on RP2350 and RP2040.
     let i2c1 = i2c::I2c::new_async(p.I2C1, p.PIN_7, p.PIN_6, Irqs, i2c::Config::default());
     let midi_fut = polling::run(
         &mut midi_class,

@@ -5,8 +5,8 @@ edition = "2021"
 license = "MIT"
 
 [features]
-default = ["rp2350"]
 rp2350 = ["embassy-rp/rp235xa"]
+rp2040 = ["embassy-rp/rp2040"]
 
 [target.'cfg(target_os = "none")'.dependencies]
 embassy-executor = { version = "0.10", features = ["platform-cortex-m", "executor-thread"] }

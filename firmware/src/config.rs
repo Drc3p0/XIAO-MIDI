@@ -22,9 +22,20 @@ pub const FLASH_SIZE: usize = 2 * 1024 * 1024;
 
 /// XIAO RP2350 GPIOs exposed for buttons/touch pads, excluding GP6/GP7
 /// (I2C1 SDA/SCL), GP22 (RGB), GP23 (RGB power), GP25 (LED).
+#[cfg(not(feature = "rp2040"))]
 pub const DIGITAL_PINS: [u8; 14] = [0, 1, 2, 3, 4, 5, 9, 10, 11, 12, 16, 17, 20, 21];
 
+/// XIAO RP2040 GPIOs exposed for buttons/touch pads (GP0–4; the front
+/// header exposes only these five as free digital pins — the rest are
+/// I2C, ADC, or the RGB LED).
+#[cfg(feature = "rp2040")]
+pub const DIGITAL_PINS: [u8; 5] = [0, 1, 2, 3, 4];
+
+#[cfg(not(feature = "rp2040"))]
 pub const ANALOG_PINS: [u8; MAX_ANALOG_INPUTS] = [26, 27, 28];
+
+#[cfg(feature = "rp2040")]
+pub const ANALOG_PINS: [u8; 4] = [26, 27, 28, 29];
 
 pub fn is_valid_digital_pin(gpio: u8) -> bool {
     DIGITAL_PINS.contains(&gpio)
@@ -326,7 +337,14 @@ impl Default for Config {
             num_touch_pads: 1,
             touch_pads: {
                 let mut arr = [empty_touch(); MAX_DIGITAL_INPUTS];
-                arr[0] = default_touch(5, 48, 100, 25);
+                #[cfg(not(feature = "rp2040"))]
+                {
+                    arr[0] = default_touch(5, 48, 100, 25);
+                }
+                #[cfg(feature = "rp2040")]
+                {
+                    arr[0] = default_touch(4, 48, 100, 25);
+                }
                 arr
             },
             num_pots: 1,
@@ -416,8 +434,8 @@ mod tests {
 
         // Same pin used by button and touch pad
         let mut cfg = Config::default();
-        cfg.buttons[0].pin = 5;
-        cfg.touch_pads[0].pin = 5;
+        cfg.buttons[0].pin = 4;
+        cfg.touch_pads[0].pin = 4;
         assert!(!cfg.validate());
     }
 

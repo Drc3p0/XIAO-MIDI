@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>XIAO-MIDI configurator (RP2040)</title>
+<script>window.XIAO_BOARD = "rp2040";</script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Sticky top toolbar -->
+<toolbar-bar id="toolbar" class="toolbar">
+  <div class="toolbar-left">
+    <h1><a href="./">XIAO-MIDI</a> <span>configurator RP2040</span></h1>
+  </div>
+  <div class="toolbar-center">
+    <button class="btn toolbar-ref-btn" data-modal="pinout" id="btnPinout" title="Pinout &amp; wiring reference">Pinout</button>
+  </div>
+  <div class="toolbar-right">
+    <span class="toolbar-status" id="toolbarStatus"></span>
+    <button class="btn btn-save" id="btnSave" disabled>Save to Flash</button>
+    <button class="btn btn-connect btn-connect-active" id="btnConnect">Connect</button>
+  </div>
+</toolbar-bar>
+
+<div class="layout">
+
+  <div class="layout-main">
+    <config-panel id="configPanel">
+
+      <!-- Buttons -->
+      <collapsible-card data-title="Buttons" data-badge-id="btnCount" id="sectionButtons">
+        <item-list data-type="button" data-list-id="buttonList" data-count-id="btnCount">
+          <div id="buttonList"></div>
+          <button class="btn btn-sm add-item-btn" data-action="add">+ Add Button</button>
+        </item-list>
+      </collapsible-card>
+
+      <!-- Touch Pads -->
+      <collapsible-card data-title="Touch Pads" data-badge-id="touchCount" id="sectionTouch">
+        <item-list data-type="touch" data-list-id="touchList" data-count-id="touchCount">
+          <div id="touchList"></div>
+          <button class="btn btn-sm add-item-btn" data-action="add">+ Add Touch Pad</button>
+        </item-list>
+      </collapsible-card>
+
+      <!-- Pots -->
+      <collapsible-card data-title="Potentiometers" data-badge-id="potCount" id="sectionPots">
+        <item-list data-type="pot" data-list-id="potList" data-count-id="potCount">
+          <div id="potList"></div>
+          <button class="btn btn-sm add-item-btn" data-action="add">+ Add Pot</button>
+        </item-list>
+      </collapsible-card>
+
+      <!-- LDR -->
+      <collapsible-card data-title="LDR (Light Sensor)" id="sectionLdr">
+        <ldr-section>
+          <div class="toggle-row">
+            <label class="toggle">
+              <input type="checkbox" id="ldrEnabled">
+              <span class="slider"></span>
+            </label>
+            <label>Enabled</label>
+            <select id="ldrPin" class="pin-select"></select>
+          </div>
+          <div id="ldrFields">
+            <div class="field">
+              <label>CC Number</label>
+              <input type="number" id="ldrCc" min="0" max="127" value="74">
+            </div>
+            <div id="ldrMonitor"></div>
+          </div>
+        </ldr-section>
+      </collapsible-card>
+
+      <!-- Accelerometer -->
+      <collapsible-card data-title="Accelerometer" id="sectionAccel">
+        <accel-section>
+          <div class="toggle-row">
+            <label class="toggle">
+              <input type="checkbox" id="accelEnabled">
+              <span class="slider"></span>
+            </label>
+            <label>Enabled</label>
+            <span class="pin-label">Accel SCL GP7</span>
+            <span class="pin-label">Accel SDA GP6</span>
+          </div>
+          <div id="accelFields">
+            <div class="field">
+              <label>Chip</label>
+              <select id="accelChip">
+                <option value="0">Auto (detect)</option>
+                <option value="1">LIS3DH</option>
+                <option value="2">MPU6050</option>
+                <option value="3">ADXL343</option>
+              </select>
+            </div>
+            <div class="field"><label>X Axis CC</label><input type="number" id="accelXCc" min="0" max="127" value="1"></div>
+            <div class="field"><label>Y Axis CC</label><input type="number" id="accelYCc" min="0" max="127" value="2"></div>
+            <div class="field"><label>Tap Note</label><input type="number" id="accelTapNote" min="0" max="127" value="48"><span class="note-hint" id="tapNoteHint"></span></div>
+            <div class="field"><label>Tap Velocity</label><input type="number" id="accelTapVel" min="1" max="127" value="127"></div>
+            <div class="field"><label>Dead Zone</label><input type="number" id="accelDeadZone" min="0" max="255" value="13"><span class="note-hint" id="deadZoneHint"></span></div>
+            <div class="field"><label>Smoothing</label><input type="number" id="accelSmoothing" min="0" max="100" value="25"><span class="note-hint" id="smoothingHint"></span></div>
+            <div id="accelMonitor"></div>
+          </div>
+        </accel-section>
+      </collapsible-card>
+
+      <!-- Settings -->
+      <collapsible-card data-title="Settings" id="sectionSettings">
+        <midi-channel>
+          <div class="field">
+            <label>MIDI Channel</label>
+            <input type="number" id="midiChannel" min="0" max="15" value="0">
+            <span class="note-hint" id="midiChannelHint">Ch 1</span>
+          </div>
+        </midi-channel>
+        <div class="project-actions-inline">
+          <h3>Project</h3>
+          <div class="project-actions">
+            <button class="btn" id="btnExport">Export Project</button>
+            <button class="btn" id="btnImport">Import Project</button>
+            <button class="btn" id="btnReset">Reset Defaults</button>
+          </div>
+          <input type="file" id="importFile" accept=".json" style="display:none">
+        </div>
+      </collapsible-card>
+
+    </config-panel>
+  </div>
+
+</div>
+
+<!-- Reference modals -->
+<ref-modal id="modalPinout" data-title="Pinout &amp; Wiring">
+  <pinout-guide>
+    <div class="pinout-guide-body"></div>
+  </pinout-guide>
+  <div class="pinout-wiring-ref">
+    <h3>Component Wiring</h3>
+    <table class="wiring-table">
+      <tr>
+        <th>Input</th>
+        <th>Components</th>
+        <th>Pins</th>
+        <th>Connection</th>
+      </tr>
+      <tr class="wiring-row-button">
+        <td><span class="wiring-dot" style="background:#0f0"></span>Button</td>
+        <td>Momentary switch</td>
+        <td>GP0–4</td>
+        <td>Switch between <strong>GPIO</strong> and <strong>GND</strong> (internal pull-up, no resistor needed)</td>
+      </tr>
+      <tr class="wiring-row-touch">
+        <td><span class="wiring-dot" style="background:#ff0"></span>Touch</td>
+        <td>Conductive pad (copper tape / foil / bare PCB)</td>
+        <td>GP0–4</td>
+        <td>Pad connected to <strong>GPIO</strong> only (capacitive sensing, no GND)</td>
+      </tr>
+      <tr class="wiring-row-pot">
+        <td><span class="wiring-dot" style="background:#c6f"></span>Pot</td>
+        <td>Potentiometer (any value)</td>
+        <td>GP26, 27, 28, 29</td>
+        <td>Outer legs to <strong>3V3</strong> + <strong>GND</strong>, wiper to <strong>ADC pin</strong></td>
+      </tr>
+      <tr class="wiring-row-ldr">
+        <td><span class="wiring-dot" style="background:#f80"></span>LDR</td>
+        <td>LDR + 10k&#8486; resistor</td>
+        <td>GP26, 27, 28, 29</td>
+        <td>Voltage divider: <strong>3V3</strong> → LDR → midpoint → <strong>ADC pin</strong>, resistor → <strong>GND</strong></td>
+      </tr>
+      <tr class="wiring-row-accel">
+        <td><span class="wiring-dot" style="background:#0af"></span>Accel</td>
+        <td>LIS3DH, MPU6050, or ADXL343 module</td>
+        <td>GP6 (SDA), GP7 (SCL)</td>
+        <td>I2C: SDA/SCL to <strong>GP6</strong>/<strong>GP7</strong>, VCC to <strong>3V3</strong>, GND to <strong>GND</strong></td>
+      </tr>
+    </table>
+
+    <h3>Pin Summary</h3>
+    <table class="wiring-table">
+      <tr><th>Pool</th><th>Available Pins</th><th>Max</th></tr>
+      <tr><td>Digital (buttons / touch)</td><td>GP0–GP4</td><td>5</td></tr>
+      <tr><td>Analog (pots / LDR)</td><td>GP26, GP27, GP28, GP29</td><td>3</td></tr>
+      <tr><td>I2C (accelerometer)</td><td>GP6 (SDA), GP7 (SCL)</td><td>fixed</td></tr>
+    </table>
+  </div>
+</ref-modal>
+
+<expr-editor id="exprEditor"></expr-editor>
+
+<toast-notification id="toast" class="toast"></toast-notification>
+<log-panel id="logPanel"></log-panel>
+
+<!-- Templates for dynamically rendered rows -->
+<template id="tpl-pot-row">
+  <div class="item-row">
+    <span class="index"></span>
+    <select class="pin-select" data-field="pin"></select>
+    <div class="monitor-bar-track" style="max-width:80px"><div class="monitor-bar-fill"></div></div>
+    <span class="monitor-value" style="min-width:24px">0</span>
+    <label>CC</label><input type="number" min="0" max="127" value="0" data-field="cc">
+    <button class="btn btn-sm btn-remove" data-action="remove" title="Remove">&times;</button>
+  </div>
+</template>
+
+<template id="tpl-touch-row">
+  <div class="item-row">
+    <span class="index"></span>
+    <select class="pin-select" data-field="pin"></select>
+    <div class="monitor-dot monitor-indicator"></div>
+    <div class="touch-monitor">
+      <div class="touch-bar-track">
+        <div class="touch-bar-fill" id=""></div>
+        <div class="touch-thr-marker" id=""></div>
+      </div>
+      <span class="monitor-value touch-val" id="">0</span>
+    </div>
+    <label>Thr%</label><input type="number" min="1" max="255" value="25" data-field="threshold_pct">
+    <button class="btn btn-sm btn-remove" data-action="remove" title="Remove">&times;</button>
+    <div class="expr-group" data-expr="note">
+      <label>Note</label><input type="text" class="expr-input" placeholder="e.g. scale(60, pot0, minor)" data-field="note_expr_src">
+      <span class="note-hint"></span>
+      <button class="btn btn-sm btn-edit-expr" data-action="edit-expr" data-expr-field="note" title="Open expression editor">&#x270E;</button>
+      <span class="expr-error" data-field="note_expr_err"></span>
+    </div>
+    <div class="expr-group" data-expr="vel">
+      <label>Vel</label><input type="text" class="expr-input" placeholder="e.g. clamp(pot1, 40, 120)" data-field="velocity_expr_src">
+      <button class="btn btn-sm btn-edit-expr" data-action="edit-expr" data-expr-field="vel" title="Open expression editor">&#x270E;</button>
+      <span class="expr-error" data-field="velocity_expr_err"></span>
+    </div>
+  </div>
+</template>
+
+<template id="tpl-button-row">
+  <div class="item-row">
+    <span class="index"></span>
+    <select class="pin-select" data-field="pin"></select>
+    <div class="monitor-dot monitor-indicator"></div>
+    <button class="btn btn-sm btn-remove" data-action="remove" title="Remove">&times;</button>
+    <div class="expr-group" data-expr="note">
+      <label>Note</label><input type="text" class="expr-input" placeholder="e.g. scale(60, pot0, minor)" data-field="note_expr_src">
+      <span class="note-hint"></span>
+      <button class="btn btn-sm btn-edit-expr" data-action="edit-expr" data-expr-field="note" title="Open expression editor">&#x270E;</button>
+      <span class="expr-error" data-field="note_expr_err"></span>
+    </div>
+    <div class="expr-group" data-expr="vel">
+      <label>Vel</label><input type="text" class="expr-input" placeholder="e.g. clamp(pot1, 40, 120)" data-field="velocity_expr_src">
+      <button class="btn btn-sm btn-edit-expr" data-action="edit-expr" data-expr-field="vel" title="Open expression editor">&#x270E;</button>
+      <span class="expr-error" data-field="velocity_expr_err"></span>
+    </div>
+  </div>
+</template>
+
+<template id="tpl-monitor-bar-row">
+  <div class="monitor-row">
+    <span class="monitor-label"></span>
+    <div class="monitor-bar-track"><div class="monitor-bar-fill"></div></div>
+    <span class="monitor-value">0</span>
+  </div>
+</template>
+
+<template id="tpl-monitor-tap-row">
+  <div class="monitor-row">
+    <span class="monitor-label">Tap</span>
+    <div class="monitor-dot monitor-tap"></div>
+  </div>
+</template>
+
+<script type="module">
+import "./components/collapsible-card.js";
+import "./components/toolbar-bar.js";
+import "./components/toast-notification.js";
+import "./components/midi-channel.js";
+import "./components/item-list.js";
+import "./components/toggle-section.js";
+import "./components/config-panel.js";
+import "./components/pinout-guide.js";
+import "./components/expr-editor.js";
+import "./components/ref-modal.js";
+import "./components/log-panel.js";
+import { init } from "./components/app.js";
+
+init({
+  toolbar: document.querySelector("toolbar-bar"),
+  configPanel: document.querySelector("config-panel"),
+  modalPinout: document.querySelector("#modalPinout"),
+  exprEditor: document.querySelector("#exprEditor"),
+  toast: document.querySelector("toast-notification"),
+  logPanel: document.querySelector("log-panel"),
+});
+</script>
+</body>
+</html>
