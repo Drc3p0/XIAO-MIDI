@@ -148,15 +148,13 @@ unsafe fn configure_inputs(
     ldr: &mut Option<input::SmoothedAnalog<'static>>,
 ) {
     let bg: [u8; MAX_DIGITAL_INPUTS] = collect_field(cfg.active_buttons(), 0, |b| b.pin);
-    buttons.configure(&bg[..cfg.num_buttons as usize]);
+    buttons.configure(&bg[..cfg.active_buttons().len()]);
 
     let tg: [u8; MAX_DIGITAL_INPUTS] = collect_field(cfg.active_touch_pads(), 0, |t| t.pin);
     let tt: [u8; MAX_DIGITAL_INPUTS] =
         collect_field(cfg.active_touch_pads(), 25, |t| t.threshold_pct);
-    touch.configure(
-        &tg[..cfg.num_touch_pads as usize],
-        &tt[..cfg.num_touch_pads as usize],
-    );
+    let n_touch = cfg.active_touch_pads().len();
+    touch.configure(&tg[..n_touch], &tt[..n_touch]);
 
     for pot in pots.iter_mut() {
         *pot = None;

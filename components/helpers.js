@@ -55,8 +55,8 @@ export function noteHintText(src) {
   return v != null ? noteName(v) : "";
 }
 
-export const ACCEL_SCL_PIN = 3;
-export const ACCEL_SDA_PIN = 2;
+export const ACCEL_SCL_PIN = 7;
+export const ACCEL_SDA_PIN = 6;
 
 export function pinLabel(n) {
   return n != null ? "GP" + n : "";

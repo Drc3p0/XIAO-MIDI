@@ -203,6 +203,13 @@ impl Config {
     }
 
     pub fn validate(&self) -> bool {
+        if self.num_buttons as usize > MAX_DIGITAL_INPUTS
+            || self.num_touch_pads as usize > MAX_DIGITAL_INPUTS
+            || self.num_pots as usize > MAX_ANALOG_INPUTS
+        {
+            return false;
+        }
+
         let mut used = [false; 30];
 
         for b in self.active_buttons() {

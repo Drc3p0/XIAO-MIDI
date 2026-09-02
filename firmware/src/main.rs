@@ -3,6 +3,9 @@
 // Embassy uses a single-threaded executor; futures do not need to be Send.
 #![allow(clippy::future_not_send)]
 
+#[cfg(all(target_os = "none", feature = "rp2350", feature = "rp2040"))]
+compile_error!("Select exactly one board feature: rp2350 or rp2040");
+
 #[cfg(all(target_os = "none", not(feature = "rp2350"), not(feature = "rp2040")))]
 compile_error!("Select a board feature: --features rp2350 or --features rp2040");
 
@@ -90,10 +93,12 @@ async fn main(_spawner: Spawner) {
 
     let mut flash =
         flash::Flash::<_, flash::Blocking, { config::FLASH_SIZE }>::new_blocking(p.FLASH);
-    let cfg = config::load_config(&mut flash).unwrap_or_else(|| {
-        log_info!("no saved config, using defaults");
-        Config::default()
-    });
+    let cfg = config::load_config(&mut flash)
+        .filter(|c| c.validate())
+        .unwrap_or_else(|| {
+            log_info!("no valid saved config, using defaults");
+            Config::default()
+        });
     log_info!("config loaded: ch={}", cfg.midi_channel);
 
     let driver = Driver::new(p.USB, Irqs);

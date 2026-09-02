@@ -44,5 +44,8 @@ jobs:
       - name: Test (x86)
         run: cargo test --no-default-features
 
+      - name: Test (x86, rp2040)
+        run: cargo test --features rp2040
+
       - name: Format
         run: cargo fmt --check

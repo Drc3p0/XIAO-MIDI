@@ -139,20 +139,21 @@ function defaultInputItem(pin, note, extras = {}) {
 }
 
 function defaultConfig() {
+  const touchPin = (globalThis.XIAO_BOARD === "rp2040") ? 4 : 5;
   return {
     midi_channel: 0,
     buttons: [
       defaultInputItem(0, 60),
     ],
     touch_pads: [
-      defaultInputItem(5, 48, { threshold_pct: 25 }),
+      defaultInputItem(touchPin, 48, { threshold_pct: 25 }),
     ],
     pots: [
       { pin: 26, cc: 7 },
     ],
-    ldr_enabled: false,
+    ldr_enabled: true,
     ldr: { pin: 28, cc: 74 },
-    accel: { enabled: false, chip: 0, x_cc: 1, y_cc: 2, tap_note: 48, tap_velocity: 127, dead_zone_tenths: 13, smoothing_pct: 25 },
+    accel: { enabled: true, chip: 0, x_cc: 1, y_cc: 2, tap_note: 48, tap_velocity: 127, dead_zone_tenths: 13, smoothing_pct: 25 },
   };
 }
 
